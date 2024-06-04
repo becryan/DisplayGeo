@@ -5,14 +5,14 @@ import View from 'ol/View.js';
 import {getRenderPixel} from 'ol/render.js';
 
 
-const geotiff = await fetch('coregistered_proj.tif')
+const geotiff = await fetch('data/img1.tif')
   .then((response) => response.blob())
   .then((blob) => {
     const source = new GeoTIFF({
       normalize: false,
       sources: [
         { blob: blob ,
-        bands:[1,2,3,4]}
+        bands:[1,2,3]}
       ],
 
     });
@@ -20,14 +20,14 @@ const geotiff = await fetch('coregistered_proj.tif')
   });
 
 
-  const geotiff2 = await fetch('20230724_222439_ssc10_u0002_pansharpened_bbox.tif')
+  const geotiff2 = await fetch('data/img2.tif')
   .then((response) => response.blob())
   .then((blob) => {
     const source = new GeoTIFF({
       normalize: false,
       sources: [
         { blob: blob ,
-        bands:[1,2,3,4]}
+        bands:[1,2,3]}
       ],
 
     });
@@ -35,26 +35,6 @@ const geotiff = await fetch('coregistered_proj.tif')
     return source;
   });
 
-
-//const source = new GeoTIFF({/
-//  sources: [
-//    {
-//      blob: 'ndvi.tif',
-//      //url: 'https://s2downloads.eox.at/demo/Sentinel-2/3857/R10m.tif',
-//      bands: [3, 4],
-//      min: 0,
-//      nodata: 0,
-//      max: 65535,
-//    },
-//    {
-//      url: 'https://s2downloads.eox.at/demo/Sentinel-2/3857/R60m.tif',
-//      bands: [9],
-//      min: 0,
-//      nodata: 0,
-//      max: 65535,
-//    },
-//  ],
-//});
 
 const max = 255;
 function normalize(value) {
@@ -64,7 +44,7 @@ function normalize(value) {
 const red = normalize(['band', 1]);
 const green = normalize(['band', 2]);
 const blue = normalize(['band', 3]);
-const nir = normalize(['band', 4]);
+const nir = normalize(['band', 3]);
 
 const ndvi = [
   '/',
@@ -83,7 +63,8 @@ const ndviPaletteViridis = {
     [
       'interpolate',
       ['linear'],
-      ['/', ['-', nir, red], ['+', nir,red]],
+      ['/', ['-', blue, red], ['+', blue,red]],
+    //  ['/', ['-', nir, red], ['+', nir,red]],
       -0.2,
       0,
       0.65,
@@ -97,12 +78,12 @@ const rgb = {         color: [
   'color',
   // red: | NDVI - NDWI |
 
-  ['*', 255, ['abs', ['-', ndvi, ndwi]]],
+  ['*', 255, green],
   // green: NDVI
 
-  ['*',255,ndvi],
+  ['*',255,blue],
   // blue: NDWI
-  ['*', 255, ndwi],
+  ['*', 255, red],
   //['*',340,b3],
   // alpha
 //  ['band', 4],
@@ -115,25 +96,25 @@ const b3=['band',3];
 const geotiffLayer = new TileLayer({
   source: geotiff,
   opacity: 1,
-  style: ndviPaletteViridis
+  style: rgb
 })
 
 const geotiffLayer2 = new TileLayer({
   source: geotiff2,
   opacity: 1,
-  style: ndviPaletteViridis
+  style: rgb
 })
 
 const map = new Map({
   target: 'map',
   layers: [geotiffLayer, geotiffLayer2  ],
-  //view: geotiff.getView(),
-  view: new View({
-    center: [525822.25, 4276947.5],
-    zoom:1,
-    showFullExtent: true,
-    extent:[524808.5, 4276440, 526836, 4277455]
-  }),
+  view: geotiff.getView(),
+  //view: new View({
+  //  center: [525822.25, 4276947.5],
+  //  zoom:5,
+  //  showFullExtent: true,
+  //  extent:[524808.5, 4276440, 526836, 4277455]
+  //}),
  
   //view: source.getView(),
 });
