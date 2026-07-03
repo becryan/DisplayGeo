@@ -70,21 +70,23 @@
           <div class="card-content">
             <div id="controls">
 
-              <div id="layer-controls" style="margin-bottom:12px; display:flex; gap:12px; align-items:flex-start;">
-                <div id="layers-list" style="flex:1;"></div>
+              <div id="layer-controls"
+                style="margin-bottom:12px; display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div id="layers-list" style="flex:1; min-width:180px;"></div>
 
-                <div style="display:flex; flex-direction:column; gap:6px;">
-                  <div class="file-field input-field">
+                <div
+                  style="display:flex; flex-direction:column; gap:6px; min-width:220px; width:100%; max-width:260px;">
+                  <div class="file-field input-field" style="width:100%;">
                     <div class="btn"><span>File</span><input id="fileInput" type="file" accept=".tif,.tiff" multiple>
                     </div>
                     <div class="file-path-wrapper"><input class="file-path validate" type="text"
                         placeholder="Upload local GeoTIFFs"></div>
                   </div>
 
-                  <div class="input-field" style="margin:0;">
-                    <input id="urlInput" type="text" placeholder="https://.../image.tif" style="width:200px;">
+                  <div class="input-field" style="margin:0; width:100%;">
+                    <input id="urlInput" type="text" placeholder="https://.../image.tif" style="width:100%;">
                   </div>
-                  <button id="loadUrl" class="btn">Load URL</button>
+                  <button id="loadUrl" class="btn" style="width:100%;">Load URL</button>
                 </div>
               </div>
 
