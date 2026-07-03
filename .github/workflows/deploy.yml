@@ -1,0 +1,45 @@
+name: Deploy to DigitalOcean Droplet
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Deploy to Droplet via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            cd /var/www/displaygeo
+            git pull origin main
+            npm install
+            npm run build
+            # If using pm2:
+            pm2 restart displaygeo
+            # If using systemd (replace displaygeo.service with your service name):
+            # sudo systemctl restart displaygeo
+
+      - name: Deploy notification
+        run: echo "✅ Deployment to DigitalOcean Droplet completed successfully!"
