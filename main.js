@@ -356,39 +356,92 @@ async function buildAwsHeaders(url, region, accessKey, secretKey, sessionToken) 
   return headers;
 }
 
-const s3UrlInput = document.getElementById('s3UrlInput');
-const awsRegionInput = document.getElementById('awsRegion');
-const awsAccessKeyInput = document.getElementById('awsAccessKey');
-const awsSecretKeyInput = document.getElementById('awsSecretKey');
-const awsSessionTokenInput = document.getElementById('awsSessionToken');
+const s3BucketInput = document.getElementById('s3BucketInput');
+const s3PrefixInput = document.getElementById('s3PrefixInput');
+const listS3Btn = document.getElementById('listS3');
+const s3ObjectsSelect = document.getElementById('s3Objects');
 const loadS3Btn = document.getElementById('loadS3');
+
+function getS3Host(bucket, region) {
+  if (!region || region === 'us-east-1') return `${bucket}.s3.amazonaws.com`;
+  return `${bucket}.s3.${region}.amazonaws.com`;
+}
+
+async function listS3Objects(bucket, prefix = '', region = envAwsRegion) {
+  if (!bucket) throw new Error('Bucket required');
+  const host = getS3Host(bucket, region);
+  const url = `https://${host}/?list-type=2&prefix=${encodeURIComponent(prefix || '')}&max-keys=1000`;
+  const headers = await buildAwsHeaders(url, region, envAwsAccessKey, envAwsSecretKey, envAwsSessionToken);
+  const resp = await fetch(url, { headers });
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`List objects failed ${resp.status}: ${resp.statusText}\n${text}`);
+  }
+  const xml = await resp.text();
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xml, 'application/xml');
+  const contents = Array.from(doc.getElementsByTagName('Contents'));
+  const keys = contents.map((c) => c.getElementsByTagName('Key')[0].textContent);
+  return keys;
+}
+
+if (listS3Btn) {
+  listS3Btn.addEventListener('click', async () => {
+    const bucket = s3BucketInput.value.trim();
+    const prefix = s3PrefixInput.value.trim();
+    const region = envAwsRegion;
+    if (!bucket) {
+      alert('Enter bucket name');
+      return;
+    }
+    try {
+      s3ObjectsSelect.innerHTML = '<option value="">Loading...</option>';
+      const keys = await listS3Objects(bucket, prefix, region);
+      if (!keys.length) {
+        s3ObjectsSelect.innerHTML = '<option value="">-- no objects --</option>';
+        return;
+      }
+      s3ObjectsSelect.innerHTML = '';
+      keys.forEach((k) => {
+        const opt = document.createElement('option');
+        opt.value = k;
+        opt.textContent = k;
+        s3ObjectsSelect.appendChild(opt);
+      });
+    } catch (err) {
+      console.error('List S3 failed', err);
+      alert('Failed to list objects: ' + err.message);
+      s3ObjectsSelect.innerHTML = '<option value="">-- error --</option>';
+    }
+  });
+}
 
 if (loadS3Btn) {
   loadS3Btn.addEventListener('click', async () => {
-    const url = s3UrlInput.value.trim();
-    const region = awsRegionInput.value.trim() || envAwsRegion || 'us-east-1';
-    const accessKey = awsAccessKeyInput.value.trim() || envAwsAccessKey;
-    const secretKey = awsSecretKeyInput.value.trim() || envAwsSecretKey;
-    const sessionToken = awsSessionTokenInput.value.trim() || envAwsSessionToken;
-
-    if (!url || !accessKey || !secretKey) {
-      alert('Enter S3 URL and provide AWS credentials either in the form or with a .env/VITE_ variable.');
+    const bucket = s3BucketInput.value.trim();
+    const region = envAwsRegion;
+    const selected = s3ObjectsSelect.value;
+    if (!bucket || !selected) {
+      alert('Choose a bucket and select an object first');
       return;
     }
-
     try {
-      const headers = await buildAwsHeaders(url, region, accessKey, secretKey, sessionToken);
+      // encode each segment of key to preserve slashes
+      const encodedKey = selected.split('/').map(encodeURIComponent).join('/');
+      const host = getS3Host(bucket, region);
+      const url = `https://${host}/${encodedKey}`;
+      const headers = await buildAwsHeaders(url, region, envAwsAccessKey, envAwsSecretKey, envAwsSessionToken);
       const resp = await fetch(url, { headers });
       if (!resp.ok) {
-        const errorText = await resp.text();
-        throw new Error(`S3 fetch failed ${resp.status}: ${resp.statusText}\n${errorText}`);
+        const txt = await resp.text();
+        throw new Error(`S3 fetch failed ${resp.status}: ${resp.statusText}\n${txt}`);
       }
       const blob = await resp.blob();
       const source = new GeoTIFF({ normalize: false, sources: [{ blob: blob, bands: [1, 2, 3] }] });
-      addLayerFromSource(source, `S3:${url.split('/').pop()}`);
+      addLayerFromSource(source, `S3:${selected}`);
     } catch (err) {
-      console.error('Failed to load S3 GeoTIFF', err);
-      alert('Failed to load S3 GeoTIFF: ' + err.message);
+      console.error('Failed to load S3 object', err);
+      alert('Failed to load S3 object: ' + err.message);
     }
   });
 }

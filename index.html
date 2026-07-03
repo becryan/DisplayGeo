@@ -151,35 +151,31 @@
                   <div id="s3LoaderSection" style="display:none;">
                     <div style="margin-bottom:12px;">
                       <h6 style="margin-bottom:8px; font-weight:700;">S3 Geotiff Load</h6>
-                      <p style="margin:0 0 12px; font-size:0.92rem; color:#444; line-height:1.4;">If you set AWS
-                        credentials
-                        in a Vite .env file with <code>VITE_AWS_ACCESS_KEY_ID</code> and
-                        <code>VITE_AWS_SECRET_ACCESS_KEY</code>, those values will be used automatically.
-                      </p>
+                      <p style="margin:0 0 12px; font-size:0.92rem; color:#444; line-height:1.4;">Enter a
+                        bucket name and optional prefix, click "List objects" to browse files, then choose an object
+                        and click "Load selected". AWS credentials must be provided via environment variables
+                        (<code>VITE_AWS_ACCESS_KEY_ID</code> / <code>VITE_AWS_SECRET_ACCESS_KEY</code>).</p>
+
                       <div class="input-field" style="margin:0; width:100%;">
-                        <input id="s3UrlInput" type="text"
-                          placeholder="https://bucket.s3.amazonaws.com/path/to/image.tif" style="width:100%;">
-                        <label for="s3UrlInput">S3 URL</label>
+                        <input id="s3BucketInput" type="text" placeholder="my-bucket-name" style="width:100%;">
+                        <label for="s3BucketInput">S3 Bucket</label>
                       </div>
+
                       <div class="input-field" style="margin:0; width:100%;">
-                        <input id="awsRegion" type="text" placeholder="us-east-1" style="width:100%;">
-                        <label for="awsRegion">AWS Region</label>
+                        <input id="s3PrefixInput" type="text" placeholder="optional/prefix/" style="width:100%;">
+                        <label for="s3PrefixInput">Prefix (optional)</label>
                       </div>
-                      <div class="input-field" style="margin:0; width:100%;">
-                        <input id="awsAccessKey" type="text" placeholder="AWS Access Key ID" style="width:100%;">
-                        <label for="awsAccessKey">Access Key ID</label>
+
+                      <div style="display:flex; gap:8px; margin-top:8px;">
+                        <button id="listS3" class="btn" style="flex:1;">List objects</button>
+                        <button id="loadS3" class="btn green" style="flex:1;">Load selected</button>
                       </div>
-                      <div class="input-field" style="margin:0; width:100%;">
-                        <input id="awsSecretKey" type="password" placeholder="AWS Secret Access Key"
-                          style="width:100%;">
-                        <label for="awsSecretKey">Secret Access Key</label>
+
+                      <div style="margin-top:8px;">
+                        <select id="s3Objects" style="width:100%;">
+                          <option value="">-- no objects listed --</option>
+                        </select>
                       </div>
-                      <div class="input-field" style="margin:0; width:100%;">
-                        <input id="awsSessionToken" type="password" placeholder="Optional session token"
-                          style="width:100%;">
-                        <label for="awsSessionToken">Session Token</label>
-                      </div>
-                      <button id="loadS3" class="btn green" style="width:100%;">Load from S3</button>
                     </div>
                   </div>
                 </div>
