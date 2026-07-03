@@ -125,7 +125,32 @@ const map = new Map({
 console.log(map);
 
 const swipe = document.getElementById('swipe');
+const panel = document.getElementById('panel');
+const togglePanel = document.getElementById('togglePanel');
+const swipeWrapper = document.getElementById('swipeWrapper');
 
+function updateSwipeWidth() {
+  if (!swipeWrapper) return;
+  if (panel?.classList.contains('collapsed')) {
+    swipeWrapper.style.maxWidth = '80vw';
+  } else {
+    swipeWrapper.style.maxWidth = 'calc((100vw - 450px) * 0.8)';
+  }
+}
+
+if (togglePanel) {
+  togglePanel.addEventListener('click', () => {
+    if (!panel) return;
+    panel.classList.toggle('collapsed');
+    const icon = togglePanel.querySelector('i');
+    if (icon) icon.textContent = panel.classList.contains('collapsed') ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left';
+    updateSwipeWidth();
+    map.updateSize();
+  });
+}
+
+window.addEventListener('resize', updateSwipeWidth);
+updateSwipeWidth();
 geotiffLayer2.on('prerender', function (event) {
   const gl = event.context;
   gl.enable(gl.SCISSOR_TEST);

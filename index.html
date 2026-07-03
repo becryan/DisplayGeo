@@ -13,48 +13,80 @@
       width: 100%;
       height: 100%;
     }
+
+    #panel.collapsed {
+      width: 48px !important;
+      padding: 12px 4px !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+      min-width: 48px !important;
+    }
+
+    #panel.collapsed .card {
+      display: none;
+    }
+
+    #panel.collapsed .panel-title {
+      display: none;
+    }
+
+    #panel.collapsed h5 {
+      justify-content: center;
+    }
   </style>
 </head>
 
 <body>
-  <div class="app" style="display:flex; height:100vh;">
-    <div id="map" class="map" style="flex:1; height:100%;"></div>
+  <div class="app" style="display:flex; flex-direction:column; height:100vh;">
+    <div style="display:flex; flex:1;">
+      <div id="map" class="map" style="flex:1; height:100%;"></div>
 
-    <aside id="panel" class="panel"
-      style="width:320px; padding:12px; box-shadow:-2px 0 6px rgba(0,0,0,0.1); background:#fff; overflow:auto;">
-      <h5 class="black-text" style="margin-top:0;">Controls</h5>
-      <div class="card">
-        <div class="card-content">
-          <div id="controls">
-            <div class="input-field" style="margin-bottom:12px;"><label>Swipe:</label><input id="swipe" type="range"
-                style="width:60%"></div>
+      <aside id="panel" class="panel"
+        style="width:450px; padding:12px; box-shadow:-2px 0 6px rgba(0,0,0,0.1); background:#fff; overflow:auto;">
+        <h5 class="black-text" style="margin-top:0; display:flex; align-items:center; justify-content:space-between;">
+          <span class="panel-title">Image Controls</span>
+          <button id="togglePanel" class="btn-flat" style="margin-top:-4px; padding:0;"><i
+              class="material-icons">keyboard_double_arrow_left</i></button>
+        </h5>
+        <div class="card">
+          <div class="card-content">
+            <div id="controls">
 
-            <div id="layer-controls" style="margin-bottom:12px; display:flex; gap:12px; align-items:flex-start;">
-              <div id="layers-list" style="flex:1;"></div>
+              <div id="layer-controls" style="margin-bottom:12px; display:flex; gap:12px; align-items:flex-start;">
+                <div id="layers-list" style="flex:1;"></div>
 
-              <div style="display:flex; flex-direction:column; gap:6px;">
-                <div class="file-field input-field">
-                  <div class="btn"><span>File</span><input id="fileInput" type="file" accept=".tif,.tiff" multiple>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <div class="file-field input-field">
+                    <div class="btn"><span>File</span><input id="fileInput" type="file" accept=".tif,.tiff" multiple>
+                    </div>
+                    <div class="file-path-wrapper"><input class="file-path validate" type="text"
+                        placeholder="Upload local GeoTIFFs"></div>
                   </div>
-                  <div class="file-path-wrapper"><input class="file-path validate" type="text"
-                      placeholder="Upload local GeoTIFFs"></div>
-                </div>
 
-                <div class="input-field" style="margin:0;">
-                  <input id="urlInput" type="text" placeholder="https://.../image.tif" style="width:200px;">
+                  <div class="input-field" style="margin:0;">
+                    <input id="urlInput" type="text" placeholder="https://.../image.tif" style="width:200px;">
+                  </div>
+                  <button id="loadUrl" class="btn">Load URL</button>
                 </div>
-                <button id="loadUrl" class="btn">Load URL</button>
               </div>
-            </div>
 
-            <div id="readout" style="margin-top:8px; font-family:monospace;">
-              <div><span id="coord">Coord: -</span></div>
-              <div><span id="pixel">Pixel: -</span></div>
+              <div id="readout" style="margin-top:8px; font-family:monospace;">
+                <div><span id="coord">Coord: -</span></div>
+                <div><span id="pixel">Pixel: -</span></div>
+              </div>
             </div>
           </div>
         </div>
+      </aside>
+    </div>
+
+    <div
+      style="background:#f5f5f5; padding:12px; border-top:1px solid #e0e0e0; display:flex; justify-content:center; align-items:center; gap:12px;">
+      <label style="margin:0; white-space:nowrap;">Swipe:</label>
+      <div id="swipeWrapper" style="width:80%; max-width:calc((100vw - 450px) * 0.8); margin:0 auto;">
+        <input id="swipe" type="range" style="width:100%;">
       </div>
-    </aside>
+    </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
