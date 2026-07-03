@@ -21,6 +21,10 @@ A small Nodejs with OpenLayers GeoTIFF compare/viewer with a swipe control and c
 
 	http://localhost:5173
 
+## Screenshot
+
+![DisplayGeo app screenshot](images/app-screenshot.PNG)
+
 ## S3 GeoTIFF usage
 The app can list and load GeoTIFF objects directly from an S3 bucket. For security, credentials are not entered in the UI — instead provide them as Vite environment variables during local development.
 
