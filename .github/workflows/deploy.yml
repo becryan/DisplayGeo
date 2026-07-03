@@ -42,4 +42,4 @@ jobs:
             # sudo systemctl restart displaygeo
 
       - name: Deploy notification
-        run: echo "✅ Deployment to DigitalOcean Droplet completed successfully!"
+        run: echo "Deployment to DigitalOcean Droplet completed successfully!"

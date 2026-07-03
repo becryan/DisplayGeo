@@ -51,7 +51,3 @@ Notes:
 
 ## Other loaders
 - Use the `File / S3 geotiff url` loader mode to upload local `.tif/.tiff` files or to load a GeoTIFF directly from a URL.
-
-## Troubleshooting
-- If listing objects fails, verify your bucket name, region, and that the credentials have `s3:ListBucket` / `s3:GetObject` permissions.
-
