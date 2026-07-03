@@ -4,6 +4,10 @@ import TileLayer from 'ol/layer/WebGLTile.js';
 import View from 'ol/View.js';
 import { getRenderPixel } from 'ol/render.js';
 
+const envAwsAccessKey = import.meta.env.VITE_AWS_ACCESS_KEY_ID || '';
+const envAwsSecretKey = import.meta.env.VITE_AWS_SECRET_ACCESS_KEY || '';
+const envAwsSessionToken = import.meta.env.VITE_AWS_SESSION_TOKEN || '';
+const envAwsRegion = import.meta.env.VITE_AWS_REGION || 'us-east-1';
 
 const geotiff = await fetch('data/img1.tif')
   .then((response) => response.blob())
@@ -263,6 +267,112 @@ loadUrlBtn.addEventListener('click', async () => {
     alert('Failed to load URL: ' + err.message);
   }
 });
+
+async function sha256(message) {
+  const data = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return new Uint8Array(hashBuffer);
+}
+
+function toHex(bytes) {
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function hmac(key, msg) {
+  const cryptoKey = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', cryptoKey, msg);
+  return new Uint8Array(sig);
+}
+
+async function getSignatureKey(key, dateStamp, regionName, serviceName) {
+  const kDate = await hmac(new TextEncoder().encode('AWS4' + key), new TextEncoder().encode(dateStamp));
+  const kRegion = await hmac(kDate, new TextEncoder().encode(regionName));
+  const kService = await hmac(kRegion, new TextEncoder().encode(serviceName));
+  const kSigning = await hmac(kService, new TextEncoder().encode('aws4_request'));
+  return kSigning;
+}
+
+async function buildAwsHeaders(url, region, accessKey, secretKey, sessionToken) {
+  const method = 'GET';
+  const service = 's3';
+  const urlObj = new URL(url);
+  const host = urlObj.host;
+  const now = new Date();
+  const amzDate = now.toISOString().replace(/[:-]| /g, '').slice(0, 15) + 'Z';
+  const dateStamp = amzDate.slice(0, 8);
+  const payloadHash = toHex(await sha256(''));
+  let canonicalHeaders = `host:${host}\nx-amz-content-sha256:${payloadHash}\nx-amz-date:${amzDate}\n`;
+  let signedHeaders = 'host;x-amz-content-sha256;x-amz-date';
+  if (sessionToken) {
+    canonicalHeaders += `x-amz-security-token:${sessionToken}\n`;
+    signedHeaders += ';x-amz-security-token';
+  }
+  const canonicalQueryString = urlObj.searchParams.toString();
+  const canonicalRequest = [
+    method,
+    urlObj.pathname,
+    canonicalQueryString,
+    canonicalHeaders,
+    signedHeaders,
+    payloadHash,
+  ].join('\n');
+  const credentialScope = `${dateStamp}/${region}/${service}/aws4_request`;
+  const stringToSign = [
+    'AWS4-HMAC-SHA256',
+    amzDate,
+    credentialScope,
+    toHex(await sha256(canonicalRequest)),
+  ].join('\n');
+  const signingKey = await getSignatureKey(secretKey, dateStamp, region, service);
+  const signature = toHex(await hmac(signingKey, new TextEncoder().encode(stringToSign)));
+  const authorization = `AWS4-HMAC-SHA256 Credential=${accessKey}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
+  const headers = {
+    'x-amz-date': amzDate,
+    'x-amz-content-sha256': payloadHash,
+    Authorization: authorization,
+  };
+  if (sessionToken) {
+    headers['x-amz-security-token'] = sessionToken;
+  }
+  return headers;
+}
+
+const s3UrlInput = document.getElementById('s3UrlInput');
+const awsRegionInput = document.getElementById('awsRegion');
+const awsAccessKeyInput = document.getElementById('awsAccessKey');
+const awsSecretKeyInput = document.getElementById('awsSecretKey');
+const awsSessionTokenInput = document.getElementById('awsSessionToken');
+const loadS3Btn = document.getElementById('loadS3');
+
+if (loadS3Btn) {
+  loadS3Btn.addEventListener('click', async () => {
+    const url = s3UrlInput.value.trim();
+    const region = awsRegionInput.value.trim() || envAwsRegion || 'us-east-1';
+    const accessKey = awsAccessKeyInput.value.trim() || envAwsAccessKey;
+    const secretKey = awsSecretKeyInput.value.trim() || envAwsSecretKey;
+    const sessionToken = awsSessionTokenInput.value.trim() || envAwsSessionToken;
+
+    if (!url || !accessKey || !secretKey) {
+      alert('Enter S3 URL and provide AWS credentials either in the form or with a .env/VITE_ variable.');
+      return;
+    }
+
+    try {
+      const headers = await buildAwsHeaders(url, region, accessKey, secretKey, sessionToken);
+      const resp = await fetch(url, { headers });
+      if (!resp.ok) {
+        const errorText = await resp.text();
+        throw new Error(`S3 fetch failed ${resp.status}: ${resp.statusText}\n${errorText}`);
+      }
+      const blob = await resp.blob();
+      const source = new GeoTIFF({ normalize: false, sources: [{ blob: blob, bands: [1, 2, 3] }] });
+      addLayerFromSource(source, `S3:${url.split('/').pop()}`);
+    } catch (err) {
+      console.error('Failed to load S3 GeoTIFF', err);
+      alert('Failed to load S3 GeoTIFF: ' + err.message);
+    }
+  });
+}
 
 // --- Coordinate and pixel readout ---
 const coordEl = document.getElementById('coord');

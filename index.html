@@ -136,6 +136,35 @@
                 </div>
               </div>
 
+              <div style="margin-bottom:12px;">
+                <h6 style="margin-bottom:8px; font-weight:700;">S3 GeoTIFF load</h6>
+                <p style="margin:0 0 12px; font-size:0.92rem; color:#444; line-height:1.4;">If you set AWS credentials
+                  in a Vite .env file with <code>VITE_AWS_ACCESS_KEY_ID</code> and
+                  <code>VITE_AWS_SECRET_ACCESS_KEY</code>, those values will be used automatically.</p>
+                <div class="input-field" style="margin:0; width:100%;">
+                  <input id="s3UrlInput" type="text" placeholder="https://bucket.s3.amazonaws.com/path/to/image.tif"
+                    style="width:100%;">
+                  <label for="s3UrlInput">S3 URL</label>
+                </div>
+                <div class="input-field" style="margin:0; width:100%;">
+                  <input id="awsRegion" type="text" placeholder="us-east-1" style="width:100%;">
+                  <label for="awsRegion">AWS Region</label>
+                </div>
+                <div class="input-field" style="margin:0; width:100%;">
+                  <input id="awsAccessKey" type="text" placeholder="AWS Access Key ID" style="width:100%;">
+                  <label for="awsAccessKey">Access Key ID</label>
+                </div>
+                <div class="input-field" style="margin:0; width:100%;">
+                  <input id="awsSecretKey" type="password" placeholder="AWS Secret Access Key" style="width:100%;">
+                  <label for="awsSecretKey">Secret Access Key</label>
+                </div>
+                <div class="input-field" style="margin:0; width:100%;">
+                  <input id="awsSessionToken" type="password" placeholder="Optional session token" style="width:100%;">
+                  <label for="awsSessionToken">Session Token</label>
+                </div>
+                <button id="loadS3" class="btn green" style="width:100%;">Load from S3</button>
+              </div>
+
               <div id="readout" style="margin-top:8px; font-family:monospace;">
                 <div><span id="coord">Coord: -</span></div>
                 <div><span id="pixel">Pixel: -</span></div>
