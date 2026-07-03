@@ -33,6 +33,24 @@
     #panel.collapsed h5 {
       justify-content: center;
     }
+
+    .panel-toggle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.08);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16);
+      border: none;
+      color: #000;
+    }
+
+    .panel-toggle i {
+      font-size: 20px;
+      line-height: 1;
+    }
   </style>
 </head>
 
@@ -45,7 +63,7 @@
         style="width:450px; padding:12px; box-shadow:-2px 0 6px rgba(0,0,0,0.1); background:#fff; overflow:auto;">
         <h5 class="black-text" style="margin-top:0; display:flex; align-items:center; justify-content:space-between;">
           <span class="panel-title">Image Controls</span>
-          <button id="togglePanel" class="btn-flat" style="margin-top:-4px; padding:0;"><i
+          <button id="togglePanel" class="panel-toggle" type="button"><i
               class="material-icons">keyboard_double_arrow_left</i></button>
         </h5>
         <div class="card">
