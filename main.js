@@ -268,6 +268,25 @@ loadUrlBtn.addEventListener('click', async () => {
   }
 });
 
+const loaderLocalRadio = document.getElementById('loaderLocal');
+const loaderS3Radio = document.getElementById('loaderS3');
+const localLoaderSection = document.getElementById('localLoaderSection');
+const s3LoaderSection = document.getElementById('s3LoaderSection');
+
+function updateLoaderMode() {
+  if (loaderS3Radio?.checked) {
+    localLoaderSection.style.display = 'none';
+    s3LoaderSection.style.display = 'block';
+  } else {
+    localLoaderSection.style.display = 'block';
+    s3LoaderSection.style.display = 'none';
+  }
+}
+
+loaderLocalRadio?.addEventListener('change', updateLoaderMode);
+loaderS3Radio?.addEventListener('change', updateLoaderMode);
+updateLoaderMode();
+
 async function sha256(message) {
   const data = new TextEncoder().encode(message);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
