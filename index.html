@@ -51,12 +51,46 @@
       font-size: 20px;
       line-height: 1;
     }
+
+    .layout-row {
+      display: flex;
+      flex: 1;
+    }
+
+    @media (max-width: 1100px) {
+      .layout-row {
+        flex-direction: column;
+      }
+
+      #panel {
+        width: auto !important;
+        max-width: 100% !important;
+      }
+
+      #panel.collapsed {
+        width: 48px !important;
+        min-width: 48px !important;
+      }
+
+      #layer-controls {
+        flex-direction: column !important;
+      }
+
+      #layers-list {
+        min-width: auto !important;
+        width: 100% !important;
+      }
+
+      #swipeWrapper {
+        max-width: 80vw !important;
+      }
+    }
   </style>
 </head>
 
 <body>
   <div class="app" style="display:flex; flex-direction:column; height:100vh;">
-    <div style="display:flex; flex:1;">
+    <div class="layout-row" style="display:flex; flex:1;">
       <div id="map" class="map" style="flex:1; height:100%;"></div>
 
       <aside id="panel" class="panel"
