@@ -9,40 +9,61 @@ const envAwsSecretKey = import.meta.env.VITE_AWS_SECRET_ACCESS_KEY || '';
 const envAwsSessionToken = import.meta.env.VITE_AWS_SESSION_TOKEN || '';
 const envAwsRegion = import.meta.env.VITE_AWS_REGION || 'us-east-1';
 
-const geotiff = await fetch('data/img1.tif')
-  .then((response) => response.blob())
-  .then((blob) => {
-    const source = new GeoTIFF({
-      normalize: false,
-      sources: [
-        {
-          blob: blob,
-          bands: [1, 2, 3]
-        }
-      ],
+let geotiff;
+let geotiff2;
+let geotiffLayer;
+let geotiffLayer2;
+let layerCollection;
+let map;
 
-    });
-    return source;
+async function loadGeoTIFF(url) {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return new GeoTIFF({
+    normalize: false,
+    sources: [{ blob: blob, bands: [1, 2, 3] }],
+  });
+}
+
+async function init() {
+  geotiff = await loadGeoTIFF('data/img1.tif');
+  geotiff2 = await loadGeoTIFF('data/img2.tif');
+
+  geotiffLayer = makeLayer(geotiff, 'img1.tif');
+  geotiffLayer2 = makeLayer(geotiff2, 'img2.tif');
+
+  layerCollection = [geotiffLayer, geotiffLayer2];
+
+  map = new Map({
+    target: 'map',
+    layers: layerCollection,
+    view: geotiff.getView(),
   });
 
+  updateLayersList();
 
-const geotiff2 = await fetch('data/img2.tif')
-  .then((response) => response.blob())
-  .then((blob) => {
-    const source = new GeoTIFF({
-      normalize: false,
-      sources: [
-        {
-          blob: blob,
-          bands: [1, 2, 3]
-        }
-      ],
+  geotiffLayer2.on('prerender', function (event) {
+    const gl = event.context;
+    gl.enable(gl.SCISSOR_TEST);
 
-    });
-    console.log(source.getView());
-    return source;
+    const mapSize = map.getSize();
+    const bottomLeft = getRenderPixel(event, [0, mapSize[1]]);
+    const topRight = getRenderPixel(event, [mapSize[0], 0]);
+
+    const width = Math.round((topRight[0] - bottomLeft[0]) * (swipe.value / 100));
+    const height = topRight[1] - bottomLeft[1];
+
+    gl.scissor(bottomLeft[0], bottomLeft[1], width, height);
   });
 
+  geotiffLayer2.on('postrender', function (event) {
+    const gl = event.context;
+    gl.disable(gl.SCISSOR_TEST);
+  });
+
+  map.getLayers().on('add', updateLayersList);
+  map.getLayers().on('remove', updateLayersList);
+}
 
 const max = 255;
 function normalize(value) {
@@ -115,19 +136,6 @@ function makeLayer(source, name) {
   });
 }
 
-const geotiffLayer = makeLayer(geotiff, 'img1.tif');
-const geotiffLayer2 = makeLayer(geotiff2, 'img2.tif');
-
-const layerCollection = [geotiffLayer, geotiffLayer2];
-
-const map = new Map({
-  target: 'map',
-  layers: layerCollection,
-  view: geotiff.getView(),
-});
-
-console.log(map);
-
 const swipe = document.getElementById('swipe');
 const panel = document.getElementById('panel');
 const togglePanel = document.getElementById('togglePanel');
@@ -155,26 +163,8 @@ if (togglePanel) {
 
 window.addEventListener('resize', updateSwipeWidth);
 updateSwipeWidth();
-geotiffLayer2.on('prerender', function (event) {
-  const gl = event.context;
-  gl.enable(gl.SCISSOR_TEST);
 
-  const mapSize = map.getSize(); // [width, height] in CSS pixels
-
-  // get render coordinates and dimensions given CSS coordinates
-  const bottomLeft = getRenderPixel(event, [0, mapSize[1]]);
-  const topRight = getRenderPixel(event, [mapSize[0], 0]);
-
-  const width = Math.round((topRight[0] - bottomLeft[0]) * (swipe.value / 100));
-  const height = topRight[1] - bottomLeft[1];
-
-  gl.scissor(bottomLeft[0], bottomLeft[1], width, height);
-});
-
-geotiffLayer2.on('postrender', function (event) {
-  const gl = event.context;
-  gl.disable(gl.SCISSOR_TEST);
-});
+init().catch(console.error);
 
 swipe.addEventListener('input', function () {
   map.render();
