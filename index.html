@@ -8,6 +8,12 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+    }
+
     .map {
       /* map fills left area */
       width: 100%;
@@ -89,7 +95,13 @@
 </head>
 
 <body>
-  <div class="app" style="display:flex; flex-direction:column; height:100vh;">
+  <nav class="blue lighten-1">
+    <div class="nav-wrapper container">
+      <a href="#" class="brand-logo">Coregistration Image Pair (Compare)</a>
+      <span class="right hide-on-small-and-down" style="margin-right: 1rem;">GeoTIFF viewer / compare</span>
+    </div>
+  </nav>
+  <div class="app" style="display:flex; flex-direction:column; height:calc(100vh - 64px);">
     <div class="layout-row" style="display:flex; flex:1;">
       <div id="map" class="map" style="flex:1; height:100%;"></div>
 
