@@ -32,14 +32,11 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
-            cd /var/www/displaygeo
+            cd /var/www/DisplayGeo
             git pull origin main
             npm install
             npm run build
-            # If using pm2:
-            pm2 restart displaygeo
-            # If using systemd (replace displaygeo.service with your service name):
-            # sudo systemctl restart displaygeo
+            sudo systemctl restart nginx
 
       - name: Deploy notification
         run: echo "Deployment to DigitalOcean Droplet completed successfully!"
