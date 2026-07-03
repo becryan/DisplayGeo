@@ -153,6 +153,7 @@ swipe.addEventListener('input', function () {
 
 // --- Layer controls, file/url loader ---
 const layersListEl = document.getElementById('layers-list');
+if (layersListEl) layersListEl.classList.add('collection');
 
 function updateLayersList() {
   layersListEl.innerHTML = '';
@@ -161,12 +162,14 @@ function updateLayersList() {
     div.style.display = 'flex';
     div.style.gap = '8px';
     div.style.alignItems = 'center';
+    div.className = 'collection-item';
 
     const name = layer.get('properties')?.name || layer.get('name') || `layer-${idx}`;
 
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.checked = layer.getVisible();
+    cb.className = 'filled-in';
     cb.addEventListener('change', () => { layer.setVisible(cb.checked); });
 
     const label = document.createElement('span');
