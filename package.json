@@ -1,6 +1,7 @@
 {
   "name": "cog-math-multisource",
   "dependencies": {
+    "geotiff": "^3.0.5",
     "ol": "9.1.0",
     "proj4": "^2.11.0"
   },
