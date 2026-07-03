@@ -1,20 +1,40 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>Yield Vine Layer</title>
-    <link rel="stylesheet" href="node_modules/ol/ol.css">
-    <style>
-      .map {
-        width: 80%;
-        height: 600px;
-      }
-    </style>
-  </head>
-  <body>Vine Map
-    <div id="map" class="map"></div>
-    <input id="swipe" type="range" style="width: 80%">
 
-    <script type="module" src="main.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <title>Yield Vine Layer</title>
+  <link rel="stylesheet" href="node_modules/ol/ol.css">
+  <style>
+    .map {
+      width: 80%;
+      height: 600px;
+    }
+  </style>
+</head>
+
+<body>Vine Map
+  <div id="map" class="map"></div>
+
+  <div id="controls" style="width:80%; margin-top:8px;">
+    <label>Swipe: <input id="swipe" type="range" style="width:60%"></label>
+    <div id="layer-controls" style="margin-top:8px; display:flex; gap:12px; align-items:center;">
+      <div id="layers-list"></div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label>Load file: <input id="fileInput" type="file" accept=".tif,.tiff" multiple></label>
+        <label>Load URL: <input id="urlInput" type="text" placeholder="https://.../image.tif"
+            style="width:320px;"></label>
+        <button id="loadUrl">Load URL</button>
+      </div>
+    </div>
+    <div id="readout" style="margin-top:8px; font-family:monospace;">
+      <span id="coord">Coord: -</span>
+      &nbsp;|&nbsp;
+      <span id="pixel">Pixel: -</span>
+    </div>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+
 </html>
